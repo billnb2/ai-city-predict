@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>去哪儿 AI 潜力城市运营驾驶舱</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#1f2937;font-size:14px}
+header{background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 0}
+.header-inner{max-width:1360px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:16px}
+.header-left h1{font-size:18px;font-weight:700;color:#111827}
+.header-left .sub{font-size:12px;color:#6b7280;margin-top:1px}
+.header-right{display:flex;gap:6px;margin-left:auto}
+.header-right a{text-decoration:none;font-size:13px;padding:6px 16px;border-radius:20px;color:#6b7280;font-weight:500}
+.header-right a.active{background:#eff6ff;color:#2563eb}
+.container{max-width:1360px;margin:0 auto;padding:20px 24px}
+.alert{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+.alert-icon{font-size:22px;line-height:1}
+.alert h3{font-size:14px;font-weight:600;color:#9a3412}
+.alert p{font-size:13px;color:#c2410c;margin-top:3px}
+.columns{display:grid;grid-template-columns:320px 1fr;gap:20px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+.panel-title{font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.city-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:all .1s}
+.city-row:hover{background:#f9fafb}
+.city-row.active{background:#eff6ff;border-color:#bfdbfe}
+.city-rank{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.city-rank.t3{background:#3b82f6}
+.city-rank.other{background:#d1d5db}
+.city-name{font-weight:500;font-size:13px;flex:1}
+.city-score{font-weight:700;font-size:14px}
+.s-green{color:#16a34a}
+.s-yellow{color:#ca8a04}
+.badge-warn{font-size:10px;background:#fff7ed;color:#ea580c;padding:1px 7px;border-radius:999px;font-weight:600}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.metric{text-align:center;padding:12px 6px;border-radius:8px}
+.metric .ml{font-size:11px;color:#6b7280}
+.metric .mv{font-size:20px;font-weight:700;margin-top:2px}
+.metric .msub{font-size:11px;color:#9ca3af;margin-top:1px}
+.bg-blue{background:#eff6ff}
+.bg-green{background:#f0fdf4}
+.bg-purple{background:#faf5ff}
+.bg-orange{background:#fff7ed}
+.ops-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+.ops-card{padding:12px;border-radius:8px}
+.ops-card .ol{font-size:12px;font-weight:600}
+.ops-card .os{font-size:20px;color:#eab308;margin-top:2px}
+.ops-card .od{font-size:11px;color:#6b7280;margin-top:2px}
+.chart-wrap{height:180px;margin-top:4px}
+.signals{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
+.signal{background:#f9fafb;padding:8px 10px;border-radius:6px;display:flex;justify-content:space-between;font-size:12px}
+.signal .sl{color:#6b7280}
+.signal .sv{font-weight:600}
+.signal .up{color:#16a34a}
+.timeline{background:#f9fafb;border-radius:8px;padding:12px 14px;margin-top:10px}
+.tl-row{display:flex;align-items:center;gap:8px;padding:5px 0}
+.tl-dot{width:8px;height:8px;border-radius:999px;flex-shrink:0}
+.tl-dot.current{background:#3b82f6}
+.tl-dot.upcoming{background:#d1d5db}
+.tl-dot.warn{background:#ea580c}
+.tl-label{font-size:12px;color:#6b7280;flex:1}
+.tl-action{font-size:12px;font-weight:500}
+.tl-line{width:1px;height:12px;background:#e5e7eb;margin-left:3.5px}
+.ai-explanation{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-top:8px}
+.ai-explanation .ai-title{font-size:12px;font-weight:600;color:#15803d;margin-bottom:6px}
+.ai-item{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 0}
+.ai-item .check{color:#16a34a;font-weight:700}
+.summary-text{font-size:12px;color:#6b7280;background:#f9fafb;padding:10px 12px;border-radius:6px;margin-top:8px;line-height:1.6}
+.split-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.detail-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+.detail-chart{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+.detail-chart h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.comp-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.comp-chart-box{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px}
+.comp-chart-box h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.comp-chart-box .chart{height:200px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center}
+.stat-card .snum{font-size:28px;font-weight:700;margin-top:4px}
+.action-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.action-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+.action-card .ach{font-size:14px;font-weight:600;margin-bottom:10px}
+.ar{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.ar+.ar{border-top:1px solid #f3f4f6}
+.action-summary{font-size:12px;color:#6b7280;background:#f9fafb;padding:8px 10px;border-radius:6px;margin-top:8px}
+.sel-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sel-row select{padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;flex:1}
+.vs-block{text-align:center;font-size:24px;font-weight:700;color:#3b82f6;min-width:70px}
+.vs-block .sim-tag{font-size:11px;color:#2563eb;background:#eff6ff;padding:3px 10px;border-radius:999px;display:block;margin-top:4px}
+.back{text-decoration:none;color:#6b7280;font-size:13px;margin-right:12px;cursor:pointer}
+.tag-prophet{font-size:10px;color:#9ca3af;border:1px solid #e5e7eb;border-radius:4px;padding:2px 8px;margin-left:auto}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+let MOCK_DATA = [
+  {city:"荣昌",score:91,warn:true,days:3,ref:"天水",sim:89,hotel:78,traffic:65,mkt:92,trend:[28,35,42,55,68,80,91],bsi:[1200,1500,2100,3200,5100,7800,10500],signals:[{l:"百度搜索",v:"↑31%",c:"up"},{l:"短视频播放",v:"↑215%",c:"up"},{l:"高德迁徙",v:"↑14%",c:"up"},{l:"节日倒计时",v:"4天",c:""},{l:"相似城市",v:"天水 89%",c:""}],summary:"短视频话题增速显著，与天水爆发前高度相似，预计3天内进入窗口。"},
+  {city:"泉州",score:88,warn:true,days:5,ref:"淄博",sim:85,hotel:82,traffic:75,mkt:95,trend:[32,35,38,46,58,71,85],bsi:[980,1100,1350,1900,2800,4200,6500],signals:[{l:"百度搜索",v:"↑28%",c:"up"},{l:"短视频播放",v:"↑180%",c:"up"},{l:"高德迁徙",v:"↑11%",c:"up"},{l:"节日倒计时",v:"6天",c:""},{l:"相似城市",v:"淄博 85%",c:""}],summary:"非遗文化持续发酵，与淄博爆发前趋势一致，预计5天内进入窗口。"},
+  {city:"景德镇",score:84,warn:false,days:0,ref:"大理",sim:72,hotel:85,traffic:70,mkt:80,trend:[30,33,38,42,50,58,65],bsi:[850,920,1050,1200,1500,2100,2900],signals:[{l:"百度搜索",v:"↑15%",c:"up"},{l:"短视频播放",v:"↑88%",c:"up"},{l:"高德迁徙",v:"↑5%",c:"up"},{l:"节日倒计时",v:"8天",c:""},{l:"相似城市",v:"大理 72%",c:""}],summary:"手工体验类稳步增长，搜索呈线性上升趋势。"},
+  {city:"延吉",score:82,warn:false,days:0,ref:"哈尔滨",sim:78,hotel:72,traffic:60,mkt:88,trend:[25,30,38,45,55,62,72],bsi:[750,820,980,1150,1450,2100,3100],signals:[{l:"百度搜索",v:"↑22%",c:"up"},{l:"短视频播放",v:"↑120%",c:"up"},{l:"高德迁徙",v:"↑8%",c:"up"},{l:"节日倒计时",v:"12天",c:""},{l:"相似城市",v:"哈尔滨 78%",c:""}],summary:"朝鲜族美食民俗持续走热，当前处于潜伏期。"},
+  {city:"柳州",score:79,warn:false,days:0,ref:"天水",sim:68,hotel:80,traffic:72,mkt:82,trend:[28,30,35,40,48,55,62],bsi:[680,720,850,980,1200,1600,2200],signals:[{l:"百度搜索",v:"↑12%",c:"up"},{l:"短视频播放",v:"↑65%",c:"up"},{l:"高德迁徙",v:"↑3%",c:"up"},{l:"节日倒计时",v:"10天",c:""},{l:"相似城市",v:"天水 68%",c:""}],summary:"螺蟳粉IP基础深厚，当前增速平稳。"},
+  {city:"江门",score:76,warn:false,days:0,ref:"淄博",sim:65,hotel:75,traffic:68,mkt:78,trend:[22,25,30,36,42,50,58],bsi:[550,600,680,800,950,1200,1600],signals:[{l:"百度搜索",v:"↑8%",c:"up"},{l:"短视频播放",v:"↑42%",c:"up"},{l:"高德迁徙",v:"↑2%",c:"up"},{l:"节日倒计时",v:"14天",c:""},{l:"相似城市",v:"淄博 65%",c:""}],summary:"侨乡文化有一定讨论度，缺乏引爆点。"},
+  {city:"芜湖",score:74,warn:false,days:0,ref:"淄博",sim:62,hotel:78,traffic:70,mkt:72,trend:[20,22,28,32,38,45,52],bsi:[480,520,580,680,820,1050,1350],signals:[{l:"百度搜索",v:"↑5%",c:"up"},{l:"短视频播放",v:"↑30%",c:"up"},{l:"高德迁徙",v:"↑1%",c:""},{l:"节日倒计时",v:"15天",c:""},{l:"相似城市",v:"淄博 62%",c:""}],summary:"主题公园有传播基础，增速平稳。"},
+  {city:"北海",score:71,warn:false,days:0,ref:"大理",sim:60,hotel:82,traffic:65,mkt:68,trend:[18,22,25,30,35,42,48],bsi:[420,460,520,600,720,880,1100],signals:[{l:"百度搜索",v:"↑4%",c:"up"},{l:"短视频播放",v:"↑25%",c:"up"},{l:"高德迁徙",v:"+1%",c:""},{l:"节日倒计时",v:"18天",c:""},{l:"相似城市",v:"大理 60%",c:""}],summary:"海滨目的地，建议关注暮期前趋势。"},
+  {city:"遵义",score:68,warn:false,days:0,ref:"天水",sim:58,hotel:70,traffic:62,mkt:65,trend:[15,18,22,26,30,35,42],bsi:[350,380,420,480,560,680,850],signals:[{l:"百度搜索",v:"↑2%",c:""},{l:"短视频播放",v:"↑15%",c:""},{l:"高德迁徙",v:"+0%",c:""},{l:"节日倒计时",v:"20天",c:""},{l:"相似城市",v:"天水 58%",c:""}],summary:"短期爆发概率较低。"},
+  {city:"宜昌",score:65,warn:false,days:0,ref:"哈尔滨",sim:52,hotel:74,traffic:68,mkt:60,trend:[12,14,18,22,25,28,32],bsi:[280,300,320,380,420,480,560],signals:[{l:"百度搜索",v:"+1%",c:""},{l:"短视频播放",v:"↑8%",c:""},{l:"高德迁徙",v:"+0%",c:""},{l:"节日倒计时",v:"22天",c:""},{l:"相似城市",v:"哈尔滨 52%",c:""}],summary:"社交媒体热度偏低。"}
+];
+
+
+let DATA = MOCK_DATA;
+
+async function loadData() {
+  try {
+    let r = await fetch('/prediction.json');
+    if (r.ok) { let j = await r.json(); if (j && j.length > 0) DATA = j; }
+  } catch(e) {}
+  render();
+}
+
+function render() {
+  let p = new URLSearchParams(location.hash.slice(1)), v = p.get('view') || 'dashboard';
+  if (v == 'dashboard') renderDashboard();
+  else if (v == 'detail') renderDetail(p.get('city') || DATA[0].city);
+  else if (v == 'compare') renderCompare();
+  else if (v == 'operation') renderOperation();
+}
+
+
+function nav(v, e) { location.hash = 'view=' + v + (e ? '&' + e : ''); }
+
+function hdr(a) {
+  let tabs = ['dashboard','compare','operation'];
+  let labels = ['首页','城市对比','运营建议'];
+  let links = tabs.map((t,i) => '<a href="#" onclick="nav(\''+t+'\')" class="'+(a==t?'active':'')+'">'+labels[i]+'</a>').join('');
+  return '<header><div class="header-inner"><div class="header-left"><h1>去哪儿 AI 潜力城市运营驾驶舱</h1><div class="sub">AI预测 × 运营决策支持平台</div></div><div class="tag-prophet">Prophet v1.1</div><div class="header-right">'+links+'</div></div></header>';
+}
+
+function sc(s) { return s >= 80 ? 's-green' : s >= 60 ? 's-yellow' : ''; }
+
+function stars(n) { let r = Math.round(n/20); return '<span style="color:#eab308;font-size:16px">'+'★'.repeat(r)+'☆'.repeat(5-r)+'</span>'; }
+
+function renderFactors(d) {
+  if (!d.factors) return '';
+  let items = [['增长趋势','growth'],['搜索热度','search'],['迁徙指数','migration'],['供给能力','supply'],['假日','holiday']];
+  let total = 0, vals = {};
+  for (let i = 0; i < items.length; i++) { let v = Math.max(0, d.factors[items[i][1]]||0); vals[items[i][1]] = v; total += v; }
+  if (total == 0) total = 1;
+  let bars = '';
+  for (let i = 0; i < items.length; i++) {
+    let pct = Math.round(vals[items[i][1]]/total*100);
+    bars += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px"><span style="width:54px;color:#6b7280;text-align:right">'+items[i][0]+'</span><div style="flex:1;height:12px;background:#f3f4f6;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#3b82f6;border-radius:3px"></div></div><span style="width:30px;color:#374151;font-weight:600;font-size:10px">'+pct+'%</span></div>';
+  }
+  return '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb"><div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px">贡献因素</div>'+bars+'</div>';
+}
+
+
+function tchart(id, data, ht) {
+  setTimeout(function() {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var c = echarts.init(el);
+    c.setOption({
+      grid: { left: 36, right: 12, top: 12, bottom: 20 },
+      xAxis: { type: 'category', data: Array.from({length:data.length},function(_,i){return 'D+'+(i+1);}), axisLabel: {fontSize:10,color:'#9ca3af'}, axisLine: {show:false}, axisTick: {show:false} },
+      yAxis: { type: 'value', splitLine: {lineStyle:{color:'#f3f4f6'}}, axisLabel: {fontSize:10,color:'#9ca3af'} },
+      series: [{ data: data, type: 'line', smooth: true, symbol: 'circle', symbolSize: 5, lineStyle: {width:2,color:'#3b82f6'}, areaStyle: {color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(59,130,246,0.15)'},{offset:1,color:'rgba(59,130,246,0.01)'}]}}, itemStyle: {color:'#3b82f6'} }],
+      tooltip: { trigger: 'axis' }
+    });
+  }, 50);
+}
+
+
+function renderDashboard() {
+  var warns = DATA.filter(function(d){return d.warn;}), top = DATA.slice(0,10);
+  var sel = DATA.find(function(d){return d.city===new URLSearchParams(location.hash.slice(1)).get('sel');})||top[0];
+  var h = hdr('dashboard') + '<div class="container">';
+  if (warns.length > 0) h += '<div class="alert"><div class="alert-icon">\ud83d\udd25</div><div><h3>今日预警</h3><p>'+warns.length+'座城市进入预热窗口：'+warns.map(function(d){return d.city;}).join('、')+'，预计未来7天爆发概率较高。</p></div></div>';
+  h += '<div class="columns"><div class="panel"><div class="panel-title">\ud83d\udcca 未来7天预警</div>';
+  h += top.map(function(d,i){return '<div class="city-row'+(sel.city===d.city?' active':'')+'" onclick="nav(\'dashboard\',\'sel='+d.city+'\');renderDashboard()"><span class="city-rank '+(i<3?'t3':'other')+'">'+(i+1)+'</span><span class="city-name">'+d.city+'</span>'+(d.warn?'<span class="badge-warn">预警</span>':'')+'<span class="city-score '+sc(d.score)+'">'+d.score+'%</span></div>';}).join('');
+  h += '</div><div><div class="panel"><div class="panel-title">\ud83d\udcc8 '+sel.city+' · 热度趋势预测</div><div class="chart-wrap" id="cd1"></div></div>';
+  h += '<div class="ai-explanation"><div class="ai-title">\ud83d\udd0d AI判断依据</div>'+(sel.confidence?'<div style="font-size:10px;color:#6b7280;margin-bottom:2px">可信度: <strong>'+sel.confidence+'%</strong></div>':'')+sel.signals.map(function(s){return '<div class="ai-item"><span class="check">\u2713</span><span>'+s.l+' <strong class="'+(s.c==='up'?'s-green':'')+'">'+s.v+'</strong></span></div>';}).join('')+(sel.factors?renderFactors(sel):'')+'</div>';
+  h += '<div class="panel" style="margin-top:12px"><div class="panel-title">\ud83c\udfaf 运营建议 · '+sel.city+'</div><div class="ops-grid"><div style="background:#f0fdf4" class="ops-card"><div class="ol" style="color:#15803d">\ud83c\udfe8 酒店</div><div>'+stars(sel.hotel)+'</div><div class="od">'+(sel.hotel>=75?'建议提前锁房，预留库存':'暂不优先')+'</div></div><div style="background:#faf5ff" class="ops-card"><div class="ol" style="color:#7e22ce">\ud83d\udce2 营销</div><div>'+stars(sel.mkt)+'</div><div class="od">'+(sel.mkt>=80?'建议上线专题、达人合作':'保持日常更新')+'</div></div><div style="background:#fff7ed" class="ops-card"><div class="ol" style="color:#9a3412">\ud83d\ude84 运力</div><div>'+stars(sel.traffic)+'</div><div class="od">'+(sel.traffic>=70?'建议提前协调运力':'持续观察')+'</div></div></div></div>';
+  if (sel.days > 0) {
+    h += '<div class="panel" style="margin-top:12px"><div class="panel-title">\u23f1 预计时间轴 · '+sel.city+'</div><div class="timeline"><div class="tl-row"><div class="tl-dot current"></div><span class="tl-label">今天 · AI预警</span><span class="tl-action" style="color:#2563eb;font-weight:600">开始部署</span></div><div class="tl-line"></div><div class="tl-row"><div class="tl-dot upcoming"></div><span class="tl-label">'+sel.days+'天后 · 进入传播窗口</span><span class="tl-action" style="color:#ca8a04">上架专题页</span></div><div class="tl-line"></div><div class="tl-row"><div class="tl-dot upcoming"></div><span class="tl-label">'+Math.min(7,sel.days+2)+'天后 · 热度上升</span><span class="tl-action" style="color:#ca8a04">达人合作投放</span></div><div class="tl-line"></div><div class="tl-row"><div class="tl-dot upcoming"></div><span class="tl-label">'+(sel.days+5)+'天后 · 爆发高峰</span><span class="tl-action" style="color:#16a34a;font-weight:600">订单转化</span></div></div></div>';
+  }
+  h += '</div></div></div>';
+  document.getElementById('app').innerHTML = h;
+  tchart('cd1', sel.trend);
+}
+
+
+function renderDetail(cn) {
+  var d = DATA.find(function(x){return x.city===cn;})||DATA[0];
+  var h = hdr('') + '<div class="container"><div style="margin-bottom:14px"><a class="back" onclick="nav(\'dashboard\')">\u2190 驾驶舱</a><span style="font-size:18px;font-weight:700">'+d.city+' 详情</span>'+(d.warn?' <span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:2px 10px;border-radius:999px;font-weight:600">\ud83d\udd25 预警中</span>':'')+'</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px"><div class="metric bg-blue"><div class="ml">爆发概率</div><div class="mv '+sc(d.score)+'">'+d.score+'%</div></div><div class="metric bg-green"><div class="ml">酒店供给</div><div class="mv" style="color:#374151">'+d.hotel+'</div></div><div class="metric bg-purple"><div class="ml">交通运力</div><div class="mv" style="color:#374151">'+d.traffic+'</div></div><div class="metric bg-orange"><div class="ml">营销建议</div><div class="mv" style="color:#9333ea">'+stars(d.mkt)+'</div></div><div class="metric bg-blue"><div class="ml">相似城市</div><div class="mv" style="font-size:18px;color:#374151">'+d.ref+'</div><div class="msub">'+d.sim+'% 相似</div></div></div>';
+  h += '<div class="detail-col"><div class="detail-chart"><h4>热度趋势预测</h4><div style="height:260px" id="dd1"></div></div><div class="detail-chart"><h4>百度搜索指数</h4><div style="height:260px" id="dd2"></div></div></div>';
+  h += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:16px"><div class="panel-title">\ud83e\udd16 AI综合分析</div><div class="summary-text">'+d.summary+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px"><div style="background:#f0fdf4;padding:10px;border-radius:6px"><div style="font-size:11px;font-weight:600;color:#15803d">\ud83c\udfe8 酒店采购</div><div style="font-size:12px;color:#16a34a;margin-top:2px">'+(d.hotel>=75?'建议提前签约，锁定库存':'暂不推荐')+'</div></div><div style="background:#faf5ff;padding:10px;border-radius:6px"><div style="font-size:11px;font-weight:600;color:#7e22ce">\ud83d\udce2 营销投放</div><div style="font-size:12px;color:#9333ea;margin-top:2px">'+(d.mkt>=80?'建议上线专题':'持续观察')+'</div></div><div style="background:#fff7ed;padding:10px;border-radius:6px"><div style="font-size:11px;font-weight:600;color:#9a3412">\ud83d\ude84 运力协调</div><div style="font-size:12px;color:#c2410c;margin-top:2px">'+(d.traffic>=70?'建议增加班次':'关注铁路')+'</div></div></div></div></div>';
+  document.getElementById('app').innerHTML = h;
+  tchart('dd1', d.trend);
+  tchart('dd2', d.bsi);
+}
+
+
+function renderCompare() {
+  var uniq = [];
+  DATA.forEach(function(d){if(uniq.indexOf(d.ref)<0)uniq.push(d.ref);});
+  var h = hdr('compare') + '<div class="container"><div class="sel-row"><select id="cs1" onchange="rc2()">'+DATA.map(function(d){return '<option value="'+d.city+'">'+d.city+'</option>';}).join('')+'</select><div class="vs-block">VS<div class="sim-tag" id="simT">89% 相似</div></div><select id="cs2" onchange="rc2()">'+uniq.map(function(d){return '<option value="'+d+'">'+d+'（爆发前）</option>';}).join('')+'</select></div><div class="comp-charts"><div class="comp-chart-box"><h4 id="cl1">候选城市</h4><div id="cc1" class="chart"></div></div><div class="comp-chart-box"><h4 id="cl2">参考城市</h4><div id="cc2" class="chart"></div></div></div></div>';
+  document.getElementById('app').innerHTML = h;
+  rc2();
+}
+
+function rc2() {
+  setTimeout(function(){
+    var v1 = DATA.find(function(d){return d.city===document.getElementById('cs1').value;})||DATA[0];
+    var rn = document.getElementById('cs2').value;
+    var v2 = DATA.find(function(d){return d.ref===rn;})||DATA[0];
+    document.getElementById('cl1').textContent = v1.city + ' · 预测趋势';
+    document.getElementById('cl2').textContent = rn + ' · 爆发前趋势';
+    document.getElementById('simT').textContent = v1.sim + '% 相似';
+    tchart('cc1', v1.trend);
+    tchart('cc2', v2.trend);
+  }, 50);
+}
+
+
+function renderOperation() {
+  var s = [].concat(DATA).sort(function(a,b){return b.score-a.score;});
+  var h = hdr('operation') + '<div class="container"><div class="stats-row"><div class="stat-card"><div style="font-size:12px;color:#6b7280">建议酒店采购</div><div class="snum" style="color:#16a34a">'+s.filter(function(d){return d.hotel>=75;}).length+'</div><div style="font-size:12px;color:#9ca3af">座城市</div></div><div class="stat-card"><div style="font-size:12px;color:#6b7280">建议营销投放</div><div class="snum" style="color:#9333ea">'+s.filter(function(d){return d.mkt>=80;}).length+'</div><div style="font-size:12px;color:#9ca3af">座城市</div></div><div class="stat-card"><div style="font-size:12px;color:#6b7280">建议运力协调</div><div class="snum" style="color:#ea580c">'+s.filter(function(d){return d.traffic>=70;}).length+'</div><div style="font-size:12px;color:#9ca3af">座城市</div></div></div><div class="action-cards">'+s.map(function(d){return '<div class="action-card"><div class="ach">'+(d.warn?'\ud83d\udd25 ':'')+d.city+'<span style="float:right;font-size:20px;color:#3b82f6;font-weight:700">'+d.score+'%</span></div><div class="ar"><div><div class="an">\ud83c\udfe8 酒店采购</div><div class="ad">'+(d.hotel>=75?'建议提前签约，锁定库存':'暂不优先采购')+'</div></div>'+stars(d.hotel)+'</div><div class="ar"><div><div class="an">\ud83d\udce2 营销投放</div><div class="ad">'+(d.mkt>=80?'建议上线专题、达人合作':'保持日常内容更新')+'</div></div>'+stars(d.mkt)+'</div><div class="ar"><div><div class="an">\ud83d\ude84 运力协调</div><div class="ad">'+(d.traffic>=70?'建议增加班次，协调资源':'持续关注')+'</div></div>'+stars(d.traffic)+'</div><div class="action-summary">'+d.summary+'</div></div>';}).join('')+'</div></div>';
+  document.getElementById('app').innerHTML = h;
+}
+
+window.addEventListener("hashchange",render);loadData();
+</script>
+</body>
+</html>
