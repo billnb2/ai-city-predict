@@ -152,6 +152,19 @@ function hdr(a){return '<header><div class="header-inner"><div class="header-lef
   ['dashboard','compare','operation'].map(x=>'<a href="#" onclick="nav(\''+x+'\')" class="'+(a==x?'active':'')+'">'+(x=='dashboard'?'首页':x=='compare'?'城市对比':'运营建议')+'</a>').join('')+'</div></div></header>'}
 function sc(s){return s>=80?'s-green':s>=60?'s-yellow':''}
 function stars(n){let r=Math.round(n/20);return '<span style="color:#eab308;font-size:16px">'+'★'.repeat(r)+'☆'.repeat(5-r)+'</span>'}
+function renderFactors(d){
+  if(!d.factors) return '';
+  var items=[['增长趋势','growth'],['搜索热度','search'],['迁徙指数','migration'],['供给能力','supply'],['节假日','holiday']];
+  var total=0;var vals={};
+  for(var i=0;i<items.length;i++){var v=Math.max(0,d.factors[items[i][1]]||0);vals[items[i][1]]=v;total+=v}
+  if(total==0) total=1;
+  var bars='';
+  for(var i=0;i<items.length;i++){
+    var pct=Math.round(vals[items[i][1]]/total*100);
+    bars+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px"><span style="width:54px;color:#6b7280;text-align:right">'+items[i][0]+'</span><div style="flex:1;height:12px;background:#f3f4f6;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#3b82f6;border-radius:3px"></div></div><span style="width:30px;color:#374151;font-weight:600;font-size:10px">'+pct+'%</span></div>'
+  }
+  return '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #e5e7eb"><div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px">\u8d21\u732e\u56e0\u7d20</div>'+bars+'</div>';
+}
 function tchart(id,data,ht){
   setTimeout(()=>{
     const el=document.getElementById(id);if(!el)return
